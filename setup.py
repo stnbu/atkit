@@ -13,7 +13,7 @@ def read(file):
         return f.read().strip()
 
 console_scripts = []
-for script in ('activate', 'sandbox'):
+for script in ('activate', 'sandbox', 'logview'):
     line = '%s.%s = %s.cli:%s' % (NAME, script, NAME, script)
     console_scripts.append(line)
 

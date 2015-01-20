@@ -23,6 +23,10 @@ excepthook = ConfigValue(name='excepthook', data={
 
 omnilog = ConfigValue(name='omnilog', data={
     'enabled': True,
+    'pager': 'less',
+    'grep': 'grep',
+    'tail': 'tail',
+    'cat': 'cat',
     'log_path': os.path.join(tempdir, 'omnilog.log'),
     'loggername': 'omnilog',
     'log_template': '%(asctime)s:%(levelname)-4s %(message)s',

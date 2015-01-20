@@ -4,11 +4,13 @@ import os
 import os.path as osp
 import shutil
 import tempfile
+import itertools
 from glob import glob
 from atkit import exc
 from atkit.config import config
 from atkit.util import atprint
 import sys
+from functools import partial
 
 class ModulePathManipulator(object):
     def symlink(self, src, dst):
@@ -178,6 +180,49 @@ class SandboxedModule(ModulePathManipulator):
             if editor is not None:
                 os.system('%s %s' % (editor, path))
                 break
+
+
+class LogView(object):
+
+    def __init__(self, path=None):
+        if path is None:
+            self.path = config.omnilog.log_path
+        else:
+            self.path = path
+        self.cmds = [
+            (('pager', 'less'), config.omnilog.pager),
+            (('grep',), config.omnilog.grep),
+            (('tail',), config.omnilog.tail),
+            (('cat',), config.omnilog.cat),
+            (('ls',), self.ls),
+        ]
+        for names, cmd in self.cmds:
+            if callable(cmd):
+                func = cmd
+            else:
+                func = partial(self._cmd, cmd)
+            for name in names:
+                setattr(self, name, func)
+
+    def ls(self, args=None):
+        atprint(self.path)
+
+    def _cmd(self, cmd, args=''):
+        os.system('%s %s %s' % (cmd, args, self.path))
+
+
+def logview():
+    try:
+        action = sys.argv[1]
+    except IndexError:
+        action = 'pager'
+
+    lfv = LogView()
+    cmds = itertools.chain(*[n for n,v in lfv.cmds])
+    if action not in cmds:
+        atprint('Do not understand action "%s"' % action, fd=sys.stderr)
+        sys.exit(1)
+    getattr(lfv, action)(' '.join(sys.argv[2:]))
 
 def activate():
     try:
