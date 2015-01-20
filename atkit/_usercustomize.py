@@ -4,6 +4,10 @@ This module is symlinked somewhere in your sys.path (any original is safely pres
 disabled.
 """
 
+from atkit.util import add_to_builtin
+
+ATKIT_DISABLE_ATTR = '_atkit_disabled'
+
 def env_var_enabled(default=False):
     import os
     env_var = os.getenv('ATKIT', None)
@@ -32,13 +36,30 @@ def env_var_enabled(default=False):
         return True
     return default
 
+def atkit_disable_temporaraly():
+    # FIXME: undo some more things
+    import __builtin__
+    for name in __builtin__.atcust.keys():
+        delattr(__builtin__, name)
+    delattr(__builtin__, 'atcust')
+    setattr(__builtin__, ATKIT_DISABLE_ATTR, True)
+add_to_builtin('atkit_disable_temporaraly', atkit_disable_temporaraly)
+
+def temporary_disable():
+    import __builtin__
+    return getattr(__builtin__, ATKIT_DISABLE_ATTR, False)
+
 try:
     from atkit.config import config
     missing = False
 except ImportError:
     missing = True
 
-if not missing and env_var_enabled() and config.enabled:
+if (not temporary_disable() and
+    not missing and
+    env_var_enabled() and
+    config.enabled):
+
     from atkit.util import add_to_builtin
     if config.banner:
         from atkit.util import atprint
