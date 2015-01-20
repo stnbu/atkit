@@ -4,15 +4,43 @@ This module is symlinked somewhere in your sys.path (any original is safely pres
 disabled.
 """
 
-import os
-from atkit.config import config
+def env_var_enabled(default=False):
+    import os
+    env_var = os.getenv('ATKIT', None)
+    if env_var is None:
+        return True  # if unset, enabled!
+    neg = [
+        'disabled',
+        'no',
+        'off',
+        'stop',
+        'false',
+    ]
+    pos = [
+        'enabled',
+        'yes',
+        'on',
+        'start',
+        'true',
+    ]
+    env_var = env_var.strip().lower()
+    if env_var in neg:
+        return False
+    if env_var in pos:
+        return True
+    return default
 
-ENABLED = os.getenv('ATKIT_DISABLED', None) is None
-if ENABLED and config.enabled:
-    from atkit.util import atprint
+try:
+    from atkit.config import config
+    missing = False
+except ImportError:
+    missing = True
+
+if not missing and env_var_enabled() and config.enabled:
+    from atkit.util import add_to_builtin
     if config.banner:
+        from atkit.util import atprint
         atprint(config.banner)
-    import __builtin__
     if config.omnilog.enabled:
         from atkit.omnilog import OmniLogger
         ol = OmniLogger(name=config.omnilog.loggername, path=config.omnilog.log_path,
@@ -22,8 +50,17 @@ if ENABLED and config.enabled:
             ('ql', ol.quick_log),
             ('lv', ol.log_var),
         ):
-            setattr(__builtin__, nickname, callable)
+            add_to_builtin(nickname, callable)
     if config.excepthook.enabled:
         import sys
         from atkit.excepthook import exception_hook
         sys.excepthook = exception_hook
+    if config.omnimodule.enabled:
+        import os
+        if os.path.exists(config.omnimodule.path):
+            import imp
+            omodule = imp.load_source('omodule', config.omnimodule.path)
+            add_to_builtin('om', omodule, desc='A module usable for just about anything.')
+    if config.debugger.enabled:
+        debugger = config.debugger.module
+        add_to_builtin('bp', debugger.set_trace, desc='bp = Break Point')

@@ -8,17 +8,19 @@ from npconf import ConfigValue
 
 
 tempdir = tempfile.gettempdir()
-def get_lib_dir():
-    return os.path.join(sys.prefix, 'lib', 'python%d.%d' % (sys.version_info.major, sys.version_info.minor))
-
 banner = 'ATKit Activated Site-Wide (tempdir=%s)' % tempdir
 user_config_dir = os.path.join(os.path.expanduser('~'), '.atkit')
 
 root =  ConfigValue(name='atkit', strict=True)
 
+debugger = ConfigValue(name='debugger', data={
+    'enabled': True,
+    'module': pdb,
+})
+
 excepthook = ConfigValue(name='excepthook', data={
     'enabled': True,
-    'debugger': pdb,
+    'debugger_module': debugger.config.module,
 })
 
 omnilog = ConfigValue(name='omnilog', data={
@@ -32,14 +34,24 @@ omnilog = ConfigValue(name='omnilog', data={
     'log_template': '%(asctime)s:%(levelname)-4s %(message)s',
 })
 
+
+omnimodule = ConfigValue(name='omnimodule', data={
+    'enabled': True,
+    'path': os.path.join(user_config_dir, 'omodule.py'),
+})
+
+lib_dir = [p for p in sys.path if p.endswith('site-packages')][0]
+lib_dir = os.path.dirname(lib_dir)
 root.update({
     'enabled': True,
     'banner': banner,
     'log_path': os.path.join(tempdir, 'atkit.log'),
-    'lib_dir': get_lib_dir,  # tested with "callable()", otherwise assumed to be a string.
+    'lib_dir': lib_dir,
     'sandbox': os.path.join(user_config_dir, 'sandbox'),
     'omnilog': omnilog,
     'excepthook': excepthook,
+    'omnimodule': omnimodule,
+    'debugger': debugger,
 })
 
 

@@ -67,11 +67,7 @@ class ModulePathManipulator(object):
 class UserCustomizer(ModulePathManipulator):
 
     def __init__(self):
-        if callable(config.lib_dir):
-            self.lib_dir = config.lib_dir()
-        else:
-            self.lib_dir = config.lib_dir
-        self.ucust_target_path = osp.join(self.lib_dir, 'usercustomize.py')
+        self.ucust_target_path = osp.join(config.lib_dir, 'usercustomize.py')
         self.atkit_ucust_module_path = osp.realpath(osp.join(osp.dirname(__file__), '_usercustomize.py'))
         self.backup_name = self.ucust_target_path + '.orig'
 
@@ -92,8 +88,8 @@ class UserCustomizer(ModulePathManipulator):
         if self.installed:
             return
 
-        if not osp.exists(self.lib_dir):
-            raise exc.PathError("%s: no such directory. Cannot proceed." % self.lib_dir)
+        if not osp.exists(config.lib_dir):
+            raise exc.PathError("%s: no such directory. Cannot proceed." % config.lib_dir)
         if osp.exists(self.ucust_target_path):
             if osp.exists(self.backup_name):
                 raise exc.PathError("Backup exists. Cannot proceed: %s" % self.backup_name)

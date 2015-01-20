@@ -9,7 +9,7 @@ from atkit.config import config
 
 
 def exception_hook(type, value, tb):
-    debugger = config.excepthook.debugger
+    debugger = config.excepthook.debugger_module
     bail_conditions = [
         not sys.stderr.isatty(),
         not sys.stdin.isatty(),
