@@ -24,10 +24,3 @@ def add_to_builtin(name, obj, desc=''):
     except AttributeError:
         __builtin__.atcust = {name: obj}
     setattr(__builtin__, name, obj)
-
-def is_ipython():
-    try:
-        __IPYTHON__
-        return True
-    except NameError:
-        return False

@@ -11,6 +11,7 @@ def env_var_enabled(default=False):
         return True  # if unset, enabled!
     neg = [
         'disabled',
+        'disable',
         'no',
         'off',
         'stop',
@@ -18,6 +19,7 @@ def env_var_enabled(default=False):
     ]
     pos = [
         'enabled',
+        'enable',
         'yes',
         'on',
         'start',
@@ -64,3 +66,14 @@ if not missing and env_var_enabled() and config.enabled:
     if config.debugger.enabled:
         debugger = config.debugger.module
         add_to_builtin('bp', debugger.set_trace, desc='bp = Break Point')
+    if config.patch_builtin.enabled:
+        for name, value in config.patch_builtin.data.iteritems():
+            add_to_builtin(name, value)
+    if config.import_tracker.enabled:
+        import sys
+        from atkit.import_tracker import ImportTracker
+        sys.meta_path.insert(0, ImportTracker())
+    if config.enhanced_shell.enabled:
+        import atkit
+        _file, startup_path, _type = imp.find_module('startup', atkit.__path__)  # we don't want to actually import
+        os.environ['PYTHONSTARTUP'] = startup_path  # this is a hack, and it works.

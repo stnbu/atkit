@@ -34,6 +34,18 @@ omnilog = ConfigValue(name='omnilog', data={
     'log_template': '%(asctime)s:%(levelname)-4s %(message)s',
 })
 
+patch_builtin = ConfigValue(name='patch_builtin', data={
+    'enabled': True,
+    'data': {},
+})
+
+enhanced_shell = ConfigValue(name='enhanced_shell', data={
+    'enabled': True,
+})
+
+import_tracker = ConfigValue(name='import_tracker', data={
+    'enabled': True,
+})
 
 omnimodule = ConfigValue(name='omnimodule', data={
     'enabled': True,
@@ -52,8 +64,10 @@ root.update({
     'excepthook': excepthook,
     'omnimodule': omnimodule,
     'debugger': debugger,
+    'patch_builtin': patch_builtin,
+    'enhanced_shell': enhanced_shell,
+    'import_tracker': import_tracker,
 })
-
 
 conf_file = os.path.join(user_config_dir, 'config.py')
 root.configure(paths=conf_file)

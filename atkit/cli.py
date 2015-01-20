@@ -65,6 +65,7 @@ class ModulePathManipulator(object):
 
 
 class UserCustomizer(ModulePathManipulator):
+    # TODO: check for enimies to usercustomize (see site.check_enableusersite and "no-global-site-packages.txt")
 
     def __init__(self):
         self.ucust_target_path = osp.join(config.lib_dir, 'usercustomize.py')
